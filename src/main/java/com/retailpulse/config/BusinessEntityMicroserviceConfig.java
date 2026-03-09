@@ -45,7 +45,9 @@ public class BusinessEntityMicroserviceConfig {
         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
         .requestMatchers("/hello").authenticated()
-        .requestMatchers("/api/**").authenticated() //.hasRole("SUPER").anyRequest().authenticated()
+        .requestMatchers(HttpMethod.GET, "/api/businessEntity").hasAnyRole("ADMIN", "CASHIER", "MANAGER")
+        .requestMatchers("/api/businessEntity/**").hasAnyRole("ADMIN", "MANAGER")
+        .anyRequest().authenticated()
       );
     } else {
       System.out.println("No auth enabled");
