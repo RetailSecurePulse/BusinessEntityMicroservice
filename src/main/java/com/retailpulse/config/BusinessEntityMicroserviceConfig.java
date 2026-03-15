@@ -45,8 +45,8 @@ public class BusinessEntityMicroserviceConfig {
         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
         .requestMatchers("/hello").authenticated()
-        .requestMatchers(HttpMethod.GET, "/api/businessEntity").hasAnyRole("ADMIN", "CASHIER", "MANAGER")
-        .requestMatchers("/api/businessEntity/**").hasAnyRole("ADMIN", "MANAGER")
+        .requestMatchers(HttpMethod.GET, "/api/businessEntity").hasAnyRole("ADMIN", "CASHIER", "MANAGER", "INVENTORY_MANAGER")
+        .requestMatchers("/api/businessEntity/**").hasAnyRole("ADMIN", "MANAGER", "INVENTORY_MANAGER")
         .anyRequest().authenticated()
       );
     } else {
