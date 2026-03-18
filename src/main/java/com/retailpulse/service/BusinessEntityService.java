@@ -1,5 +1,6 @@
 package com.retailpulse.service;
 
+import com.retailpulse.annotation.AuditLog;
 import com.retailpulse.dto.request.BusinessEntityRequestDto;
 import com.retailpulse.dto.response.BusinessEntityResponseDto;
 import com.retailpulse.entity.BusinessEntity;
@@ -57,6 +58,7 @@ public class BusinessEntityService {
                 businessEntity.isActive());
     }
 
+    @AuditLog(action = "CREATE_BUSINESS_ENTITY")
     @Caching(
         put = { @CachePut(value = "businessEntity", key = "#result.id") },
         evict = { @CacheEvict(value = "businessEntityList", allEntries = true) }
@@ -74,6 +76,7 @@ public class BusinessEntityService {
         );
     }
 
+    @AuditLog(action = "UPDATE_BUSINESS_ENTITY")
     @Caching(
         put = { @CachePut(value = "businessEntity", key = "#id") },
         evict = { @CacheEvict(value = "businessEntityList", allEntries = true) }
@@ -114,6 +117,7 @@ public class BusinessEntityService {
         updater.accept(newValue);
     }
 
+    @AuditLog(action = "DELETE_BUSINESS_ENTITY")
     @Caching(
         evict = {
             @CacheEvict(value = "businessEntity", key = "#id"),
