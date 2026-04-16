@@ -12,6 +12,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Aspect
 @Component
@@ -25,12 +26,12 @@ public class AuditAspect {
 
     @Around("@annotation(auditLog)")
     public Object audit(ProceedingJoinPoint joinPoint, AuditLog auditLog) throws Throwable {
-        String actor = SecurityContextHolder.getContext().getAuthentication().getName();
+        String actor = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
         String remoteAddress = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                 .getRequest().getRemoteAddr();
 
         try {
-            Object result = joinPoint.proceed(); // Execute the actual service method
+            Object result = joinPoint.proceed();
             saveLog(actor, auditLog.action(), "SUCCESS", remoteAddress);
             return result;
         } catch (Exception e) {
@@ -43,5 +44,4 @@ public class AuditAspect {
         AuditLogEntity record = new AuditLogEntity(actor, action, status, ip, LocalDateTime.now());
         auditLogRepository.save(record);
     }
-
 }
