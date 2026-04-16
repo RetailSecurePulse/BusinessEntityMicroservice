@@ -32,7 +32,7 @@ public class BusinessEntityMicroserviceConfig {
   private String originURL;
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) {
     if (authEnabled) {
       System.out.println("Auth enabled");
       http.oauth2ResourceServer(
@@ -55,9 +55,7 @@ public class BusinessEntityMicroserviceConfig {
       http.csrf(AbstractHttpConfigurer::disable); // <--- Add this line
     }
 
-    http.cors(c -> {
-      c.configurationSource(corsConfigurationSource());
-    });
+    http.cors(c -> c.configurationSource(corsConfigurationSource()));
 
     return http.build();
   }
