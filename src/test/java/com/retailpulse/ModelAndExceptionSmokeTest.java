@@ -1,13 +1,19 @@
 package com.retailpulse;
 
+import com.retailpulse.annotation.AuditLog;
 import com.retailpulse.controller.ErrorResponse;
 import com.retailpulse.controller.exception.ApplicationException;
 import com.retailpulse.dto.BusinessEntityDto;
 import com.retailpulse.dto.request.BusinessEntityRequestDto;
 import com.retailpulse.dto.response.BusinessEntityResponseDto;
+import com.retailpulse.entity.AuditLogEntity;
 import com.retailpulse.entity.BusinessEntity;
+import com.retailpulse.service.BusinessEntityService;
 import com.retailpulse.service.exception.BusinessException;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,5 +91,33 @@ class ModelAndExceptionSmokeTest {
         assertThat(businessEntity.getType()).isEqualTo("STORE");
         assertThat(businessEntity.isExternal()).isTrue();
         assertThat(businessEntity.isActive()).isTrue();
+    }
+
+    @Test
+    void auditLogEntityConstructorSetsSuppliedFields() {
+        LocalDateTime timestamp = LocalDateTime.of(2026, 4, 16, 20, 45);
+        AuditLogEntity auditLogEntity = new AuditLogEntity("alice", "CREATE_BUSINESS_ENTITY", "SUCCESS", "127.0.0.1", timestamp);
+
+        assertThat(auditLogEntity.getActor()).isEqualTo("alice");
+        assertThat(auditLogEntity.getAction()).isEqualTo("CREATE_BUSINESS_ENTITY");
+        assertThat(auditLogEntity.getStatus()).isEqualTo("SUCCESS");
+        assertThat(auditLogEntity.getIpAddress()).isEqualTo("127.0.0.1");
+        assertThat(auditLogEntity.getTimestamp()).isEqualTo(timestamp);
+        assertThat(auditLogEntity.getDetails()).isNull();
+    }
+
+    @Test
+    void businessEntityServiceMutatingMethodsKeepAuditLogAnnotations() throws Exception {
+        assertAuditAction("saveBusinessEntity", "CREATE_BUSINESS_ENTITY", BusinessEntityRequestDto.class);
+        assertAuditAction("updateBusinessEntity", "UPDATE_BUSINESS_ENTITY", Long.class, BusinessEntityRequestDto.class);
+        assertAuditAction("deleteBusinessEntity", "DELETE_BUSINESS_ENTITY", Long.class);
+    }
+
+    private static void assertAuditAction(String methodName, String action, Class<?>... parameterTypes) throws Exception {
+        Method method = BusinessEntityService.class.getDeclaredMethod(methodName, parameterTypes);
+        AuditLog auditLog = method.getAnnotation(AuditLog.class);
+
+        assertThat(auditLog).isNotNull();
+        assertThat(auditLog.action()).isEqualTo(action);
     }
 }
