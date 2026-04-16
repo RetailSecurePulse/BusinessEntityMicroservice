@@ -32,3 +32,13 @@ logging:
     com.retailpulse: DEBUG
   file:
     name: logs/rp-businessentity.log
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health"
+    health:
+      probes:
+        enabled: true
+      show-details: "never"
