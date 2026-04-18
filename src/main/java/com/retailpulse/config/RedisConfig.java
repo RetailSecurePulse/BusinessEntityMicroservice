@@ -1,16 +1,17 @@
 package com.retailpulse.config;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.retailpulse.dto.response.BusinessEntityResponseDto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -28,17 +29,12 @@ public class RedisConfig {
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()));
 
-        // Plain ObjectMapper (no default typing)
-        ObjectMapper om = new ObjectMapper().findAndRegisterModules();
+        ObjectMapper om = JsonMapper.builder().findAndAddModules().build();
 
-        // Serializer for single BusinessEntityResponseDto
-        Jackson2JsonRedisSerializer<BusinessEntityResponseDto> entitySer = new Jackson2JsonRedisSerializer<>(om, BusinessEntityResponseDto.class);
-
-        // Serializer for List<BusinessEntityResponseDto> (handles [] correctly)
+        JacksonJsonRedisSerializer<BusinessEntityResponseDto> entitySer = serializer(om, BusinessEntityResponseDto.class);
         JavaType listType = om.getTypeFactory().constructCollectionType(List.class, BusinessEntityResponseDto.class);
-        Jackson2JsonRedisSerializer<Object> entityListSer = new Jackson2JsonRedisSerializer<>(om, listType);
+        JacksonJsonRedisSerializer<Object> entityListSer = serializer(om, listType);
 
-        // Per-cache configurations with the correct value serializer
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
         cacheConfigs.put("businessEntity", base.serializeValuesWith(
                 RedisSerializationContext.SerializationPair.fromSerializer(entitySer))
@@ -51,5 +47,13 @@ public class RedisConfig {
                 .cacheDefaults(base) // default if any other cache is added later
                 .withInitialCacheConfigurations(cacheConfigs)
                 .build();
+    }
+
+    private static <T> JacksonJsonRedisSerializer<T> serializer(ObjectMapper objectMapper, Class<T> type) {
+        return new JacksonJsonRedisSerializer<>(objectMapper, type);
+    }
+
+    private static JacksonJsonRedisSerializer<Object> serializer(ObjectMapper objectMapper, JavaType javaType) {
+        return new JacksonJsonRedisSerializer<>(objectMapper, javaType);
     }
 }

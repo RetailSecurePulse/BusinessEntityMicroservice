@@ -1,6 +1,11 @@
 package com.retailpulse.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,17 +22,17 @@ public class AuditLogEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String actor;      // The username or ID of the person acting
+    private String actor;
 
     @Column(nullable = false)
-    private String action;     // E.g., "USER_LOGIN_SUCCESS", "UPDATE_PERMISSIONS"
+    private String action;
 
     @Column(nullable = false)
-    private String status;     // "SUCCESS" or "FAILURE"
+    private String status;
 
-    private String details;    // Error messages or extra metadata
+    private String details;
 
-    private String ipAddress;  // The origin IP for SIEM "Impossible Travel" alerts
+    private String ipAddress;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
@@ -41,5 +46,4 @@ public class AuditLogEntity {
         this.ipAddress = ipAddress;
         this.timestamp = timestamp;
     }
-
 }
