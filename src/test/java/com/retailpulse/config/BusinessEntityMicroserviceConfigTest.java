@@ -44,7 +44,8 @@ class BusinessEntityMicroserviceConfigTest {
         CorsConfiguration corsConfiguration = source.getCorsConfiguration(new MockHttpServletRequest("GET", "/api/businessEntity"));
 
         assertThat(corsConfiguration).isNotNull();
-        assertThat(corsConfiguration.getAllowedOrigins()).containsExactly("http://localhost:3000");
+        assertThat(corsConfiguration.getAllowedOriginPatterns())
+                .containsExactly("http://localhost:3000", "http://localhost", "http://localhost:*", "https://localhost", "https://localhost:*");
         assertThat(corsConfiguration.getAllowedMethods()).containsExactly("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS");
         assertThat(corsConfiguration.getAllowedHeaders()).containsExactly("Authorization", "Content-Type");
         assertThat(corsConfiguration.getExposedHeaders()).containsExactly("Authorization");
