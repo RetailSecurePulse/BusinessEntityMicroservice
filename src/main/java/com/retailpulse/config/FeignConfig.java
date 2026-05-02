@@ -4,6 +4,7 @@ import feign.Logger;
 import feign.RequestInterceptor;
 import io.micrometer.tracing.Tracer;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -20,8 +21,8 @@ public class FeignConfig {
 
     private final Tracer tracer;
 
-    public FeignConfig(Tracer tracer) {
-        this.tracer = tracer;
+    public FeignConfig(ObjectProvider<Tracer> tracerProvider) {
+        this.tracer = tracerProvider.getIfAvailable();
     }
 
     @Bean
@@ -33,7 +34,7 @@ public class FeignConfig {
     public RequestInterceptor oauth2BearerForwardingInterceptor() {
         return template -> {
 
-            if (tracer.currentSpan() != null) {
+            if (tracer != null && tracer.currentSpan() != null) {
                 template.header("X-B3-TraceId", Objects.requireNonNull(tracer.currentSpan()).context().traceId());
                 template.header("X-B3-SpanId", Objects.requireNonNull(tracer.currentSpan()).context().spanId());
             }
