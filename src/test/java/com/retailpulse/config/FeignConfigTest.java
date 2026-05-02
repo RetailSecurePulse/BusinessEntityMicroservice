@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -42,7 +43,7 @@ class FeignConfigTest {
 
     @BeforeEach
     void setUp() {
-        feignConfig = new FeignConfig(tracer);
+        feignConfig = new FeignConfig(tracerProvider(tracer));
     }
 
     @AfterEach
@@ -140,6 +141,13 @@ class FeignConfigTest {
         template.method("GET");
         template.uri("/inventory");
         return template;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ObjectProvider<Tracer> tracerProvider(Tracer tracer) {
+        ObjectProvider<Tracer> tracerProvider = mock(ObjectProvider.class);
+        when(tracerProvider.getIfAvailable()).thenReturn(tracer);
+        return tracerProvider;
     }
 
     private static Collection<String> headerValues(RequestTemplate template, String headerName) {
